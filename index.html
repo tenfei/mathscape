@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   数境 · MathScape
-  Copyright (C) 2026  <你的姓名 / 昵称>
+  Copyright (C) 2026 旅人吟游
 
   本作品采用 GNU 通用公共许可证第 3 版（GPL-3.0）发布。
   你可以免费使用、修改、分发本作品；但任何再分发（含修改版）都必须以相同许可证开源。
@@ -15,6 +15,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>数境 · MathScape</title>
+<meta name="description" content="数境 MathScape 是一张交互式数学知识图谱，把 59 个核心数学概念放进「离散度 × 空间度 × 抽象度」三维坐标系，支持 2D/3D 视图切换、知识谱系、最短路径追溯与历史时间轴。">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iIzI1NjNlYiIvPjxwYXRoIGQ9Ik04IDI0SDI0TTggMjRWOCIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPjxjaXJjbGUgY3g9IjEzIiBjeT0iMTgiIHI9IjIuNCIgZmlsbD0iI2ZmZiIvPjxjaXJjbGUgY3g9IjE4IiBjeT0iMTQiIHI9IjIuNCIgZmlsbD0iI2ZmZiIvPjxjaXJjbGUgY3g9IjIyIiBjeT0iMTAuNSIgcj0iMi40IiBmaWxsPSIjZmZmIi8+PC9zdmc+">
+<meta property="og:type" content="website">
+<meta property="og:title" content="数境 · MathScape —— 数学知识坐标系">
+<meta property="og:description" content="把数学知识放进三维坐标系的交互式知识图谱：59 个核心概念、2D/3D 视图、知识谱系与历史时间轴。">
+<meta property="og:site_name" content="数境 MathScape">
 <script type="importmap">
 {
   "imports": {
@@ -24,7 +30,7 @@
 }
 </script>
 <style>
-  :root { --timeline-h: 164px; } /* v3.36：时间轴高度变量，驱动 .timeline-container 高度与 .view-controls bottom 同步过渡（零滞后） */
+  :root { --timeline-h: 164px; --footer-h: 34px; } /* v3.36：时间轴高度变量，驱动 .timeline-container 高度与 .view-controls bottom 同步过渡（零滞后）；--footer-h 为底部版权栏高度 */
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -191,6 +197,11 @@
   .node.focus-dim { opacity: 0.45; }
   .node.focus-dim .dot-label { opacity: 1; } /* v3.33：弱关系节点仍显示名称，避免"完全看不见" */
   .node.focus-active { opacity: 1; }
+  /* 点击选中节点：描边高亮 + 蓝色光晕（优先级高于 hover/焦点模式的内联透明度） */
+  .node.selected { opacity: 1 !important; }
+  .node.selected .dot-base,
+  .node.selected .avatar-base { stroke: #2563eb !important; stroke-width: 3px !important; }
+  .node.selected circle { filter: drop-shadow(0 0 5px rgba(37,99,235,0.9)) !important; }
   .legend-avatar {
     display: inline-block;
     width: 12px;
@@ -229,7 +240,7 @@
   .view-controls {
     position: absolute;
     left: 20px;
-    bottom: calc(var(--timeline-h) + 12px); /* v3.36：跟随时间轴高度同步过渡，零滞后 */
+    bottom: calc(var(--timeline-h) + var(--footer-h) + 12px); /* 跟随时间轴高度 + 底部版权栏高度同步过渡 */
     display: flex; align-items: center; gap: 8px;
     background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
     padding: 6px 8px; box-shadow: 0 1px 3px rgba(15,23,42,0.08);
@@ -291,7 +302,7 @@
   /* 底部时间轴 */
   .timeline-container {
     position: absolute;
-    bottom: 0;
+    bottom: var(--footer-h); /* 让出底部版权栏高度 */
     left: 0;
     right: 0;
     background: #fff;
@@ -302,6 +313,66 @@
     transition: height 0.3s ease, padding 0.3s ease;
     height: var(--timeline-h); /* v3.36：由 --timeline-h 变量驱动，与 .view-controls bottom 同步过渡 */
     overflow: hidden;
+  }
+  /* 底部版权栏（含微信公众号联系人与二维码） */
+  .site-footer {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: var(--footer-h);
+    display: flex; align-items: center; gap: 14px;
+    padding: 0 20px;
+    background: #f8fafc;
+    border-top: 1px solid #e5e7eb;
+    font-size: 12px; color: #64748b;
+    z-index: 9;
+  }
+  .site-footer .sf-copy { white-space: nowrap; }
+  .site-footer .sf-sep { color: #cbd5e1; }
+  .site-footer .sf-wechat { display: inline-flex; align-items: center; gap: 6px; color: #334155; font-weight: 500; cursor: pointer; position: relative; }
+  /* 悬停弹出二维码（替代原点击放大的缩略图） */
+  .site-footer .sf-qr-tooltip {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 10px);
+    transform: translateX(-50%) translateY(6px);
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 8px 24px rgba(15,23,42,0.16);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+    z-index: 30;
+  }
+  .site-footer .sf-qr-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #fff;
+  }
+  .site-footer .sf-qr-tooltip img { width: 132px; height: 132px; border-radius: 6px; display: block; pointer-events: auto; }
+  .site-footer .sf-qr-tooltip .qr-tip { font-size: 11px; color: #64748b; white-space: nowrap; }
+  .site-footer .sf-wechat:hover .sf-qr-tooltip,
+  .site-footer .sf-wechat:focus-within .sf-qr-tooltip,
+  .site-footer .sf-wechat:active .sf-qr-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }
+  @media (max-width: 600px) {
+    .site-footer { gap: 8px; padding: 0 10px; font-size: 11px; }
+    .site-footer .sf-copy .sf-long { display: none; }
+    .site-footer .sf-qr-tooltip img { width: 116px; height: 116px; }
   }
   .timeline-header {
     display: flex;
@@ -564,22 +635,31 @@
   .detail-panel.open { transform: translateX(0); }
 
   .panel-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid #e5e7eb;
+    padding: 20px 24px 14px;
+    border-bottom: none;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
   }
-  .panel-header h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+  .panel-header h2 { font-size: 20px; font-weight: 600; }
+  .panel-meta {
+    padding: 0 24px 14px;
+    border-bottom: 1px solid #e5e7eb;
+  }
   .panel-tag {
     display: inline-block;
-    padding: 3px 8px;
-    border-radius: 4px;
+    padding: 4px 10px;
+    border-radius: 6px;
     font-size: 12px;
+    line-height: 1.7;
     background: #f3f4f6;
     color: #374151;
+    white-space: normal;
+    text-align: left;
     margin-right: 6px;
   }
+  #panelCoord { width: 100%; display: flex; flex-wrap: wrap; gap: 6px 10px; background: transparent; padding: 0; margin-right: 0; align-items: center; }
+  #panelCoord .ci { flex: 0 0 auto; white-space: nowrap; display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; line-height: 1.5; background: #f3f4f6; color: #374151; }
   .panel-actions {
     display: flex;
     align-items: center;
@@ -1040,7 +1120,7 @@
     .view-controls {
       left: auto;
       right: 16px;
-      bottom: 160px;
+      bottom: calc(160px + var(--footer-h));
     }
     /* 手机端按钮显示文字标签，避免符号不明 */
     .view-controls .vc-label { display: inline; font-size: 11px; margin-left: 2px; }
@@ -1060,15 +1140,15 @@
 .lin-tag:hover { background: #e0e7ff; }
 
 /* v3.48：路径追溯高亮（纯 class !important 覆盖深度着色） */
-.link-line.path-line { stroke: #f59e0b !important; opacity: 1 !important; stroke-width: 3 !important; }
-.node.path-source .dot-base, .node.path-source .avatar-base { stroke: #f59e0b !important; stroke-width: 4 !important; }
-.node.path-target .dot-base, .node.path-target .avatar-base { stroke: #f59e0b !important; stroke-width: 4 !important; }
-.node.path-node .dot-base, .node.path-node .avatar-base { stroke: #f59e0b !important; stroke-width: 3 !important; }
-.path-banner { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 60; background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; border-radius: 10px; padding: 8px 12px; display: flex; align-items: center; gap: 12px; font-size: 13px; box-shadow: 0 6px 20px rgba(0,0,0,.12); max-width: 90vw; }
-.path-banner .pb-chain { font-weight: 600; }
-.path-banner .pb-steps { color: #b45309; }
-.path-banner .pb-close { background: #f59e0b; color: #fff; border: none; border-radius: 6px; padding: 3px 10px; cursor: pointer; font-size: 12px; }
-#pathBtn.active { background: #f59e0b; color: #fff; border-color: #f59e0b; }
+.link-line.path-line { stroke: #3b82f6 !important; opacity: 1 !important; stroke-width: 3 !important; }
+  .node.path-source .dot-base, .node.path-source .avatar-base { stroke: #3b82f6 !important; stroke-width: 4 !important; }
+  .node.path-target .dot-base, .node.path-target .avatar-base { stroke: #3b82f6 !important; stroke-width: 4 !important; }
+  .node.path-node .dot-base, .node.path-node .avatar-base { stroke: #3b82f6 !important; stroke-width: 3 !important; }
+.path-banner { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 60; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; border-radius: 10px; padding: 10px 16px; display: flex; align-items: center; gap: 14px; font-size: 13px; box-shadow: 0 6px 20px rgba(37,99,235,.18); max-width: 92vw; }
+.path-banner .pb-chain { font-weight: 600; max-width: 60vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.path-banner .pb-steps { color: #1e40af; background: #dbeafe; padding: 2px 8px; border-radius: 999px; font-size: 12px; flex-shrink: 0; }
+.path-banner .pb-close { background: #3b82f6; color: #fff; border: none; border-radius: 6px; padding: 4px 12px; cursor: pointer; font-size: 13px; margin-left: 2px; flex-shrink: 0; }
+#pathBtn.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
 
 /* v3.48：搜索命中高亮（绿色脉冲） */
 @keyframes searchPulse { 0%,100% { stroke-width: 3; } 50% { stroke-width: 5.5; } }
@@ -1170,6 +1250,7 @@ body.mode-list .nl-empty.show { display: block; }
 </style>
 </head>
 <body>
+<noscript><div style="padding:16px 24px;background:#fef2f2;border-bottom:1px solid #fecaca;color:#991b1b;font-size:14px;text-align:center;">本页面需要启用 JavaScript 才能查看交互式知识图谱。</div></noscript>
 
 <div class="header">
   <div class="header-left">
@@ -1337,9 +1418,6 @@ body.mode-list .nl-empty.show { display: block; }
     <div class="panel-header">
       <div>
         <h2 id="panelTitle">初等算术</h2>
-        <div>
-          <span class="panel-tag" id="panelCoord">离散度 0.92 · 空间度 0.08</span>
-        </div>
       </div>
       <div class="panel-actions">
         <button class="back-btn" id="panelBackBtn" type="button" style="display:none">← 返回</button>
@@ -1350,6 +1428,9 @@ body.mode-list .nl-empty.show { display: block; }
         </div>
         <button class="close-btn" id="closePanel" title="关闭 (Esc)">×</button>
       </div>
+    </div>
+    <div class="panel-meta">
+      <span id="panelCoord">离散度 0.92 · 空间度 0.08</span>
     </div>
 
     <div class="tabs">
@@ -4190,18 +4271,20 @@ function openDetail(node) {
     savedPreOpen = { year: timelineSlider.value, scale, translateX, translateY };
   }
   currentDetailNode = node.id;
+  setSelectedNode(node.id);
   panelTitle.textContent = node.name;
-  panelCoord.textContent = node.coord;
-
+  // 坐标信息：3 个指标横排成紧凑小标签（允许窄屏自然换行），不再强制竖排占高度
   const z = (typeof node.z === 'number') ? node.z : 0;
   const zText = '抽象度 ' + (z > 0 ? '+' : '') + z.toFixed(1);
-  if (view3D) {
-    // 侧视：x=离散度 / y=抽象度，不显示空间度
-    const xm = node.coord.match(/离散度 ([-\d.]+)/);
-    panelCoord.textContent = '离散度 ' + (xm ? xm[1] : '—') + ' · ' + zText;
-  } else {
-    panelCoord.textContent = node.coord + ' · ' + zText;
+  const dm = node.coord.match(/离散度\s*([-\d.]+)/);
+  const chips = [];
+  if (dm) chips.push('离散度 ' + dm[1]);
+  if (!view3D) {
+    const sm = node.coord.match(/空间度\s*([-\d.]+)/);
+    if (sm) chips.push('空间度 ' + sm[1]);
   }
+  chips.push(zText);
+  panelCoord.innerHTML = chips.map(c => '<span class="ci">' + c + '</span>').join('');
 
   document.getElementById('tab-concept').innerHTML = node.concept;
 
@@ -4277,6 +4360,17 @@ function closeDetail() {
   resetLinks();
   clearFocusMode(); // v3.33：关闭详情时还原所有节点可见度
   currentDetailNode = null;
+  clearSelectedNode();
+}
+
+// 点击选中节点高亮（2D 视图）：清除其他选中态，仅保留当前节点 .selected（CSS 叠加蓝色描边+光晕）
+function setSelectedNode(id) {
+  document.querySelectorAll('.node.selected').forEach(el => el.classList.remove('selected'));
+  const m = nodeMap[id];
+  if (m) m.element.classList.add('selected');
+}
+function clearSelectedNode() {
+  document.querySelectorAll('.node.selected').forEach(el => el.classList.remove('selected'));
 }
 
 closePanelBtn.addEventListener('click', closeDetail);
@@ -4703,6 +4797,7 @@ function buildTimelineTicks() {
     else if (posPct > 92) label.style.transform = 'translateX(-100%)';
     ticksLayer.appendChild(label);
   });
+  buildTimelineMilestones(); // 关键修复：刻度重建后同步重建每个节点诞生年的小圆点标记，避免展开/重建时间轴后丢失
 }
 
 // ===== v3.13-C 自适应播放（按事件密度变速 + 时代边界停顿） =====
@@ -5430,10 +5525,9 @@ if (isCoarse) {
 // v3.18：窗口尺寸变化时重排时代标签碰撞避让
 window.addEventListener('resize', () => { layoutEraLabels(); });
 
-// 初始化
+// 初始化（buildTimelineTicks 末尾已含小圆点标记重建，无需单独再调 buildTimelineMilestones）
 buildTimelineEraBar();
 buildTimelineTicks();
-buildTimelineMilestones();
 updateNodeVisibility();
 updateTimelineHighlight();
   timelineContainer.classList.add('collapsed');
@@ -5480,7 +5574,7 @@ if (onboarding) {
   let THREE, OrbitControls, Line2, LineMaterial, LineGeometry;
   let renderer, scene, camera, controls, raycaster, pointer;
   let nodeMeshes = [], linkLines = [], linkMats = [];
-  let flowPoints = [], glowTex = null; // v3.49：3D 流动演化层（仅 main 主线发光点）+ 共享辉光贴图
+  let flowPoints = [], glowTex = null, selHalo = null, selHaloTex = null; // v3.49：3D 流动演化层 + 选中节点蓝色光晕 sprite
   let g3ready = false, spinOn = false, rafOn = false, ensurePromise = null;
   let colNear, colLineFar;
   let camTween = null;      // 相机平滑过渡状态
@@ -5571,6 +5665,18 @@ if (onboarding) {
     const tex = new THREE.CanvasTexture(c); tex.needsUpdate = true;
     return tex;
   }
+  // 选中节点蓝色光晕贴图（普通混合，白底上可见；区别于流动点的叠加混合白光）
+  function makeSelGlowTexture(){
+    const c = document.createElement('canvas'); c.width = c.height = 64;
+    const ctx = c.getContext('2d');
+    const g = ctx.createRadialGradient(32,32,0,32,32,32);
+    g.addColorStop(0, 'rgba(37,99,235,0.85)');
+    g.addColorStop(0.4, 'rgba(37,99,235,0.4)');
+    g.addColorStop(1, 'rgba(37,99,235,0)');
+    ctx.fillStyle = g; ctx.fillRect(0,0,64,64);
+    const tex = new THREE.CanvasTexture(c); tex.needsUpdate = true;
+    return tex;
+  }
 
   async function ensure(){
     if (g3ready) return;
@@ -5635,7 +5741,9 @@ if (onboarding) {
       m.position.copy(toPos(n));
       m.userData.node = n;
       m.userData.baseScale = 1;
+      m.userData.radius = r;
       m.userData.baseEmissive = 0.05; // v3.49c：与材质 emissiveIntensity 基线一致（clear3DFocus 还原用）
+      m.userData.baseEmissiveColor = col; // 选中光晕还原用：记录节点原始自发光颜色
       scene.add(m); nodeMeshes.push(m);
     });
 
@@ -5756,9 +5864,26 @@ if (onboarding) {
       const id = m.userData.node.id;
       const on = (id === centerId) || connected.has(id);
       m.material.opacity = on ? 1 : 0.16;
-      const s = on ? (id === centerId ? m.userData.baseScale * 1.3 : m.userData.baseScale * 1.08) : m.userData.baseScale;
+      const s = on ? (id === centerId ? m.userData.baseScale * 1.35 : m.userData.baseScale * 1.08) : m.userData.baseScale;
       m.scale.setScalar(s);
-      m.material.emissiveIntensity = id === centerId ? 0.5 : (on ? 0.28 : 0.06); // v3.49c：非相关暗部自发光 0.12→0.06（与基线 0.05 一致，避免聚焦后比常态更亮）
+      // 选中节点（中心）叠加冷白光晕；其余按关联度维持/压暗自发光
+      if (id === centerId) {
+        m.material.emissive.set('#2563eb'); // 统一：选中=饱和蓝（与 2D 选中蓝一致），不再发白变浅
+        m.material.emissiveIntensity = 0.95;
+        if (!selHalo) {
+          selHaloTex = makeSelGlowTexture();
+          const hmat = new THREE.SpriteMaterial({ map: selHaloTex, transparent: true, opacity: 0.95, depthWrite: false });
+          selHalo = new THREE.Sprite(hmat);
+          selHalo.renderOrder = 5;
+          scene.add(selHalo);
+        }
+        selHalo.position.copy(m.position);
+        selHalo.scale.setScalar((m.userData.radius || 4) * 3);
+        selHalo.visible = true;
+      } else {
+        m.material.emissive.set(m.userData.baseEmissiveColor);
+        m.material.emissiveIntensity = on ? 0.28 : 0.06;
+      }
     });
     linkLines.forEach((line, i) => {
       const on = (line.userData.from === centerId) || (line.userData.to === centerId);
@@ -5768,9 +5893,11 @@ if (onboarding) {
   }
   function clear3DFocus(){
     focusActiveId = null;
+    if (selHalo) selHalo.visible = false;
     nodeMeshes.forEach(m => {
       m.material.opacity = 1;
       m.scale.setScalar(m.userData.baseScale);
+      m.material.emissive.set(m.userData.baseEmissiveColor);
       m.material.emissiveIntensity = m.userData.baseEmissive;
     });
     linkLines.forEach(line => { line.material.opacity = line.userData.baseOpacity; });
@@ -6045,6 +6172,21 @@ if (onboarding) {
 })();
 
 </script>
+
+  <!-- 底部版权栏（含微信公众号联系人与二维码） -->
+  <footer class="site-footer">
+    <span class="sf-copy">© 2026 <span class="sf-long">旅人吟游 · 数境 MathScape</span></span>
+    <span class="sf-sep">|</span>
+    <span>GPL-3.0 开源 · 双许可商用请联系作者</span>
+    <span class="sf-sep">|</span>
+    <span class="sf-wechat" tabindex="0" role="button" aria-label="微信公众号：旅人吟游，悬停查看二维码">
+      微信公众号：旅人吟游
+      <span class="sf-qr-tooltip">
+        <img src="assets/wechat-qr.png" alt="微信公众号二维码" onerror="this.parentElement.style.display='none'">
+        <span class="qr-tip">扫码关注 / 留言联系</span>
+      </span>
+    </span>
+  </footer>
 
 </body>
 </html>
