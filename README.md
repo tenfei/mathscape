@@ -1,0 +1,68 @@
+# 数境 · MathScape
+
+一个单文件、零构建的可视化知识图谱：用「离散 ↔ 连续」「数量 ↔ 空间」「抽象 ↔ 应用」三个维度，把从史前计数到现代数学的核心概念、经典例题、历史脉络与知识谱系串成一张可探索的网。
+
+> 打开即看，无需安装、无需联网构建。3D 视图依赖 CDN 加载 Three.js（首次进入 3D 需联网）。
+
+---
+
+## ✨ 功能特性
+
+- **三种视图，正交切换**
+  - **2D 俯视 / 侧视**：SVG 双视图，按深度轴做颜色与雾感着色，呈现远近层次。
+  - **3D 视图**：Three.js WebGL，节点为发光球体，主线带流动演化粒子，可旋转 / 缩放 / 自动旋转。
+  - **列表视图**（移动端优先）：按「领域 / 学段」分组浏览，支持搜索、学段筛选、年代筛选、2D/3D 一键定位。
+- **时间轴年代筛选**：拖动时间轴，只显示「已诞生」的知识点，脉络随年代推进展开。
+- **学段筛选**：小学 / 初中 / 高中 / 大学，逐级深入。
+- **知识详情**：每个节点点击后展开核心定义、经典例题（含解答）、历史脉络、知识谱系（上下游衍生）。
+- **自动播放**：沿时间轴自动推进，聚焦当前里程碑。
+
+## 🚀 本地运行
+
+直接用浏览器打开 `index.html` 即可（推荐 Chrome / Edge / Safari 新版本）。
+
+如需本地起服务（部分浏览器对 `file://` 下的 ES Module / importmap 有限制）：
+
+```bash
+cd 本项目目录
+python3 -m http.server 8000
+# 浏览器访问 http://localhost:8000/index.html
+```
+
+## 📦 部署到 GitHub Pages（免费）
+
+1. 在 GitHub 新建 **Public** 仓库，把本目录文件（`index.html`、`LICENSE`、`README.md`、`COMMERCIAL-LICENSE.md`）推上去。
+2. 仓库 **Settings → Pages**，Source 选 **Deploy from a branch**，分支选 **main**，目录选 **/ (root)**。
+3. 等待约 1 分钟，访问 `https://<你的用户名>.github.io/<仓库名>/` 即可。
+
+> 提示：GitHub Pages 在国内访问有时偏慢，如需更稳可改用 Vercel / Netlify / 国内静态托管。
+
+## 📁 目录结构
+
+```
+index.html              主程序（单文件，含 2D SVG + 3D Three.js + 列表视图）
+LICENSE                 GNU GPL v3.0 全文
+COMMERCIAL-LICENSE.md   商业授权（双许可）说明
+README.md               本文件
+```
+
+## ©️ 许可证与双许可（重要）
+
+本项目采用 **GNU 通用公共许可证第 3 版（GPL-3.0）** 发布——你可以免费使用、修改、分发本作品；但**任何再分发（包括你的修改版）都必须以相同许可证开源**。这保证了知识图谱始终属于社区、自由演进。
+
+同时，作为版权人，作者**保留商业授权（双许可）权利**：如果你希望将本作品用于**闭源商业用途**（例如集成进付费产品、去除署名、内部专有部署等），可以**另行联系作者获取商业许可证**，在付费授权下无需履行 GPL 的源码公开义务。
+
+- 开源许可证全文见 [`LICENSE`](./LICENSE)
+- 商业授权获取方式与条款见 [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md)
+
+## 🙏 第三方依赖致谢
+
+- **Three.js**（MIT License，© Three.js authors）：3D 视图的渲染引擎，通过 CDN（`unpkg.com`）加载，其许可证全文见 https://github.com/mrdoob/three.js/blob/master/LICENSE 。
+
+## ✍️ 版权声明
+
+Copyright (C) 2026 <你的姓名 / 昵称>。保留所有权利（在 GPL 授权范围内授予用户使用权限）。
+
+---
+
+欢迎 Issue / PR 共建这份数境。如需商业合作，请按 [`COMMERCIAL-LICENSE.md`](./COMMERCIAL-LICENSE.md) 联系作者。
