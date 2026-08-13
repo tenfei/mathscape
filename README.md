@@ -29,14 +29,6 @@ python3 -m http.server 8000
 # 浏览器访问 http://localhost:8000/index.html
 ```
 
-## 📦 部署到 GitHub Pages（免费）
-
-1. 在 GitHub 新建 **Public** 仓库，把本目录文件（`index.html`、`LICENSE`、`README.md`、`COMMERCIAL-LICENSE.md`）推上去。
-2. 仓库 **Settings → Pages**，Source 选 **Deploy from a branch**，分支选 **main**，目录选 **/ (root)**。
-3. 等待约 1 分钟，访问 `https://<你的用户名>.github.io/<仓库名>/` 即可。
-
-> 提示：GitHub Pages 在国内访问有时偏慢，如需更稳可改用 Vercel / Netlify / 国内静态托管。
-
 ## 📁 目录结构
 
 ```
